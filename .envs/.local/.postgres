@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=fluctua_nft_backend
+POSTGRES_USER=qYaHbIIEmXgrwoMoIZPnbssqZdbSnygH
+POSTGRES_PASSWORD=CqnXEndW4pwvJDTgMx9Pccg7ZUt3akcWwkWS47KCUIAS97cvG2CtCoFFMZ5RiBj3
