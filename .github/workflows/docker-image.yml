@@ -31,3 +31,5 @@ jobs:
           file: ./compose/production/django/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/fluctua-nft-backend:staging
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/fluctua-nft-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/fluctua-nft-backend:buildcache,mode=max
