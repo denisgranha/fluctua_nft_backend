@@ -75,10 +75,10 @@ EMAIL_SUBJECT_PREFIX = env(
     default="[fluctua_nft_backend]",
 )
 
-# # ADMIN
-# # ------------------------------------------------------------------------------
-# # Django Admin URL regex.
-# ADMIN_URL = env("DJANGO_ADMIN_URL")
+# ADMIN
+# ------------------------------------------------------------------------------
+# Django Admin URL regex.
+ADMIN_URL = env("DJANGO_ADMIN_URL")
 
 # # Anymail
 # # ------------------------------------------------------------------------------
