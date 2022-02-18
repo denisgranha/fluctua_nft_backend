@@ -105,7 +105,7 @@ spec:
             mountPath: /nginx
         env:
           - name: NGINX_ENTRYPOINT_QUIET_LOGS
-            value: "1"      
+            value: "1"
       volumes:
         - name: nginx-volume
           configMap:
