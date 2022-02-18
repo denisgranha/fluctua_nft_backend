@@ -13,4 +13,3 @@ rm -rf $DOCKER_SHARED_DIR/*
 cp -r staticfiles/ $DOCKER_SHARED_DIR/
 
 exec gunicorn --config gunicorn.conf.py --pythonpath "$PWD" -b unix:$DOCKER_SHARED_DIR/gunicorn.socket -b 0.0.0.0:8888 config.wsgi:application
-
