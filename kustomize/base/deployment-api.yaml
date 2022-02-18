@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  labels:
+    app: fluctua-nfts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fluctua-nfts
+  template:
+    metadata:
+      labels:
+        app: fluctua-nfts
+    spec:
+      containers:
+      - name: fluctua-nfts
+        image: denisgranha/fluctua-nft-backend:staging
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        command:
+          - "/entrypoint"
+        args:
+          - "/start"
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+            - name: gunicorn-volume
+              mountPath: /nginx
+        env:
+        - name: USE_DOCKER
+          value: yes
+        - name: IPYTHONDIR
+          value: "/app/.ipython"
+        - name: DJANGO_SETTINGS_MODULE
+          value: "config.settings.production"
+        - name: DJANGO_ADMIN_URL
+          value: "admin/"
+        - name: DJANGO_ALLOWED_HOSTS
+          value: "*"
+        - name: REDIS_URL
+          value: "redis://redis:6379/0"
+        - name: DJANGO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: DJANGO_SECRET_KEY
+        - name: CELERY_FLOWER_USER
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: CELERY_FLOWER_USER
+        - name: CELERY_FLOWER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: CELERY_FLOWER_PASSWORD
+        - name: POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: POSTGRES_HOST
+        - name: POSTGRES_PORT
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: POSTGRES_PORT
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: POSTGRES_PASSWORD
+      - name: nginx
+        image: nginx:1.19-alpine
+        imagePullPolicy: 'IfNotPresent'
+        resources:
+          requests:
+            memory: "30Mi"
+            cpu: "40m"
+          limits:
+            memory: "50Mi"
+            cpu: "80m"
+        volumeMounts:
+          - name: nginx-volume
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: gunicorn-volume
+            mountPath: /nginx
+        env:
+          - name: NGINX_ENTRYPOINT_QUIET_LOGS
+            value: "1"      
+      volumes:
+        - name: nginx-volume
+          configMap:
+            name: nginx-config
+        - name: gunicorn-volume
+          emptyDir: {}

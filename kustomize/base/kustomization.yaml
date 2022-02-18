@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+secretGenerator:
+  - name: fluctua-nfts
+    envs:
+      - secrets.env
+    type: Opaque
+resources:
+- deployment-redis.yaml
+- service-redis.yaml
+- configmap-api.yaml
+- deployment-api.yaml
+- deployment-celery-beat.yaml
+- deployment-celery-worker.yaml
+- service-loadbalancer.yaml
