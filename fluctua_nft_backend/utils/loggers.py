@@ -1,9 +1,5 @@
-
-  
 import logging
 import time
-
-from django.http import HttpRequest
 
 from gunicorn import glogging
 
