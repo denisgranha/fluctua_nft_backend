@@ -1,3 +1,32 @@
 resources:
 - ./../base
 namePrefix: staging-
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /metadata/annotations
+        value:
+          fluxcd.io/automated: "true"
+          fluxcd.io/tag.fluctua-nfts: regex:^staging.*
+    target:
+      kind: Deployment
+      name: api-deployment
+  - patch: |-
+      - op: replace
+        path: /metadata/annotations
+        value:
+          fluxcd.io/automated: "true"
+          fluxcd.io/tag.celery-beat: regex:^staging.*
+    target:
+      kind: Deployment
+      name: celery-beat
+  - patch: |-
+      - op: replace
+        path: /metadata/annotations
+        value:
+          fluxcd.io/automated: "true"
+          fluxcd.io/tag.celery-worker: regex:^staging.*
+    target:
+      kind: Deployment
+      name: celery-worker
