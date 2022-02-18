@@ -10,7 +10,7 @@ patches:
           fluxcd.io/automated: "true"
           fluxcd.io/tag.fluctua-nfts: regex:^staging.*
       - op: replace
-        path: /spec/template/spec/containers/0/env/REDIS_URL/value
+        path: /spec/template/spec/containers/0/env/5/value
         value: redis://staging-redis:6379/0
     target:
       kind: Deployment
