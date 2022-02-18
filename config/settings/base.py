@@ -72,11 +72,12 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "django_celery_beat",
+     'rest_framework',
 ]
 
 LOCAL_APPS = [
     "fluctua_nft_backend.users",
-    # Your stuff: custom apps go here
+    "fluctua_nft_backend.spotify",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -295,3 +296,18 @@ SOCIALACCOUNT_FORMS = {"signup": "fluctua_nft_backend.users.forms.UserSocialSign
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+# Django Rest Framework
+# ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    "PAGE_SIZE": 10,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+    ),
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
+}
