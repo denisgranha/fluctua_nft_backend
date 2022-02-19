@@ -17,9 +17,10 @@ class InfoView(APIView):
         query = {
             "scope": "user-library-modify user-read-email",
             "response_type": "code",
-            "client_id": "92fec7cd91604f69a1d9a2327d7c515c"
+            "client_id": "92fec7cd91604f69a1d9a2327d7c515c",
         }
         content = {
-            "authorizationUrl": "https://accounts.spotify.com/en/authorize?" + urlencode(query)
+            "authorizationUrl": "https://accounts.spotify.com/en/authorize?"
+            + urlencode(query)
         }
         return Response(content)
