@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fluctua-nfts
-        image: denisgranha/fluctua-nft-backend:staging
+        image: denisgranha/fluctua-nft-backend:0.1.0 # {"$imagepolicy": "flux-system:fluctua-nfts"}
         imagePullPolicy: Always
         resources:
           requests:
