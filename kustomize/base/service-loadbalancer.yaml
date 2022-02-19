@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: fluctua-nfts
   annotations:
-    service.beta.kubernetes.io/do-loadbalancer-protocol: "https"
+    service.beta.kubernetes.io/do-loadbalancer-protocol: "http"
     service.beta.kubernetes.io/do-loadbalancer-tls-ports: "443"
     service.beta.kubernetes.io/do-loadbalancer-certificate-id: "df898558-03fa-465f-b696-5922fcf4bf81"
     service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https: "true"
