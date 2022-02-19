@@ -7,4 +7,4 @@ resources:
 - deployment-api.yaml
 - deployment-celery-beat.yaml
 - deployment-celery-worker.yaml
-# - service-loadbalancer.yaml
+- service-loadbalancer.yaml
