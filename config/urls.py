@@ -16,8 +16,8 @@ urlpatterns = [
     path("users/", include("fluctua_nft_backend.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     path(
-        "api/v1/spotify/", include("fluctua_nft_backend.spotify.urls",
-        namespace="spotify"),
+        "api/v1/spotify/", 
+        include("fluctua_nft_backend.spotify.urls", namespace="spotify"),
     )
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
