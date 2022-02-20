@@ -1,7 +1,7 @@
 resources:
 - ./../base
 namePrefix: staging-
-namespace: staging-fluctua-nfts
+namespace: staging
 
 patches:
   - patch: |-
