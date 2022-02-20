@@ -8,6 +8,7 @@ metadata:
     service.beta.kubernetes.io/do-loadbalancer-certificate-id: "df898558-03fa-465f-b696-5922fcf4bf81"
     service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https: "true"
     service.beta.kubernetes.io/do-loadbalancer-name: "staging.apis.fluctuarecords.com"
+    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
 spec:
   type: LoadBalancer
   selector:
