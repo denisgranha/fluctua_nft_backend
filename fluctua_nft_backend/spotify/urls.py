@@ -4,5 +4,5 @@ from . import views
 
 app_name = "spotify"
 urlpatterns = [
-    path("info/", view=views.InfoView.as_view(), name="detail"),
+    path("info/", view=views.InfoView.as_view(), name="spotify-info"),
 ]

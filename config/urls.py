@@ -1,49 +1,60 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
-from django.views import defaults as default_views
-from django.views.generic import TemplateView
+from django.http import HttpResponse
+from django.urls import include, path, re_path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
-urlpatterns = [
-    path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
-    path(
-        "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Fluctua NFTs Service API",
+        default_version="v1",
+        description="API to manage Fluctua NFTs",
+        contact=openapi.Contact(email="info@fluctuarecords.com"),
+        license=openapi.License(name="Apache 2 License"),
     ),
-    # Django Admin, use {% url 'admin:index' %}
-    path(settings.ADMIN_URL, admin.site.urls),
-    # User management
-    path("users/", include("fluctua_nft_backend.users.urls", namespace="users")),
-    path("accounts/", include("allauth.urls")),
+    validators=["flex", "ssv"],
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
+
+schema_cache_timeout = 60 * 5  # 5 minutes
+
+swagger_urlpatterns = [
     path(
-        "api/v1/spotify/",
+        "",
+        schema_view.with_ui("swagger", cache_timeout=schema_cache_timeout),
+        name="schema-swagger-ui",
+    ),
+    re_path(
+        r"^swagger(?P<format>\.json|\.yaml)$",
+        schema_view.without_ui(cache_timeout=schema_cache_timeout),
+        name="schema-json",
+    ),
+    path(
+        "redoc/",
+        schema_view.with_ui("redoc", cache_timeout=schema_cache_timeout),
+        name="schema-redoc",
+    ),
+]
+
+urlpatterns_v1 = [
+    path(
+        "spotify/",
         include("fluctua_nft_backend.spotify.urls", namespace="spotify"),
     )
-    # Your stuff: custom urls includes go here
+]
+
+urlpatterns = swagger_urlpatterns + [
+    path(settings.ADMIN_URL, admin.site.urls),
+    path("api/v1/", include((urlpatterns_v1, "v1"))),
+    path("check/", lambda request: HttpResponse("Ok"), name="check"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 if settings.DEBUG:
-    # This allows the error pages to be debugged during development, just visit
-    # these url in browser to see how these error pages look like.
-    urlpatterns += [
-        path(
-            "400/",
-            default_views.bad_request,
-            kwargs={"exception": Exception("Bad Request!")},
-        ),
-        path(
-            "403/",
-            default_views.permission_denied,
-            kwargs={"exception": Exception("Permission Denied")},
-        ),
-        path(
-            "404/",
-            default_views.page_not_found,
-            kwargs={"exception": Exception("Page not Found")},
-        ),
-        path("500/", default_views.server_error),
-    ]
     if "debug_toolbar" in settings.INSTALLED_APPS:
         import debug_toolbar
 
