@@ -50,7 +50,7 @@ class Command(BaseCommand):
             # upload typeRepresentative.jpg to ipfs and the low res version
 
             type_representative_path = path.join(
-                root_path, dirname, "type_representative.jpg"
+                root_path, dirname, "type_representative.png"
             )
             type_representative_response = requests.post(
                 settings.IPFS_URL + "/add",
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             )
 
             type_representative_low_res_path = path.join(
-                root_path, dirname, "type_representative_low_res.jpg"
+                root_path, dirname, "type_representative_low_res.png"
             )
             type_representative_low_res_response = requests.post(
                 settings.IPFS_URL + "/add",
@@ -115,6 +115,20 @@ class Command(BaseCommand):
 
                 nft.image_ipfs_uri = nft_image_response.json()["Hash"]
                 nft.image_low_res_ipfs_uri = nft_image_low_res_response.json()["Hash"]
+
+                # Create NFT Metadata json
+                nft_metadata = nft_dict["extra"]
+                nft_metadata["name"] = nft_dict["name"]
+                nft_metadata["description"] = nft_dict["description"]
+                nft_metadata["image"] = "ipfs://" + nft.image_ipfs_uri
+
+                # upload metadata to ipfs
+                nft_metadata_response = requests.post(
+                    settings.IPFS_URL + "/add",
+                    files=dict(file=json.dumps(nft_metadata, indent=4)),
+                )
+
+                nft.metadata_ipfs_uri = nft_metadata_response.json()["Hash"]
 
                 nft.save()
                 self.stdout.write(self.style.SUCCESS(nft_file_name))
