@@ -113,8 +113,8 @@ class Command(BaseCommand):
                     files=dict(file=open(nft_image_low_res_path, "rb")),
                 )
 
-                nft.image_ipfs_uri = nft_image_response.json()['Hash']
-                nft.image_low_res_ipfs_uri = nft_image_low_res_response.json()['Hash']
+                nft.image_ipfs_uri = nft_image_response.json()["Hash"]
+                nft.image_low_res_ipfs_uri = nft_image_low_res_response.json()["Hash"]
 
                 nft.save()
                 self.stdout.write(self.style.SUCCESS(nft_file_name))
