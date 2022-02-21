@@ -4,7 +4,6 @@ Base settings to build other settings files upon.
 from pathlib import Path
 
 import environ
-from corsheaders.defaults import default_headers as default_cors_headers
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # fluctua_nft_backend/
@@ -267,3 +266,5 @@ SWAGGER_SETTINGS = {
         "api_key": {"type": "apiKey", "in": "header", "name": "Authorization"}
     },
 }
+
+IPFS_URL = env("IPFS_URL", default="https://ipfs.infura.io:5001/api/v0")

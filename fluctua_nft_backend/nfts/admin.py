@@ -3,13 +3,13 @@ from django.contrib import admin
 from . import models
 
 
-class NFTAdmin(admin.ModelAdmin):
+class NftAdmin(admin.ModelAdmin):
     pass
 
 
-class NFTTypeAdmin(admin.ModelAdmin):
+class NftTypeAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(models.NFT, NFTAdmin)
-admin.site.register(models.NFTType, NFTTypeAdmin)
+admin.site.register(models.Nft, NftAdmin)
+admin.site.register(models.NftType, NftTypeAdmin)

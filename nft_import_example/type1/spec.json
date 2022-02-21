@@ -1,0 +1,14 @@
+{
+    "name": "NFT Type Name 1",
+    "description": "NFT Type 1 Lorem Ipsum...",
+    "nfts": [
+        {
+            "name": "NFT Name 1",
+            "description": "NFT 1 Lorem Ipsum...",
+            "extra": {
+                "backgroundColor": "#ffffff",
+                "theme": "What A Show"
+            }
+        }
+    ]
+}
