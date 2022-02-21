@@ -29,7 +29,9 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "%s NFT Types detected in %s" % (nft_types_count, options["from"])))
+                "%s NFT Types detected in %s" % (nft_types_count, options["from"])
+            )
+        )
 
         # loop NFT Type folders
         for dirname in root_path_dirs:
@@ -52,7 +54,7 @@ class Command(BaseCommand):
             )
             type_representative_response = requests.post(
                 settings.IPFS_URL + "/add",
-                files=dict(file=open(type_representative_path, "rb"))
+                files=dict(file=open(type_representative_path, "rb")),
             )
 
             type_representative_low_res_path = path.join(
@@ -60,7 +62,7 @@ class Command(BaseCommand):
             )
             type_representative_low_res_response = requests.post(
                 settings.IPFS_URL + "/add",
-                files=dict(file=open(type_representative_low_res_path, "rb"))
+                files=dict(file=open(type_representative_low_res_path, "rb")),
             )
 
             type_representative_hash = type_representative_response.json()["Hash"]
@@ -70,7 +72,7 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    'Uploaded to IPFS type representatives %s and %s'
+                    "Uploaded to IPFS type representatives %s and %s"
                     % (type_representative_hash, type_representative_low_res_hash)
                 )
             )
@@ -100,7 +102,7 @@ class Command(BaseCommand):
                 nft_image_path = path.join(root_path, dirname, nft_file_name)
                 nft_image_response = requests.post(
                     settings.IPFS_URL + "/add",
-                    files=dict(file=open(nft_image_path, "rb"))
+                    files=dict(file=open(nft_image_path, "rb")),
                 )
 
                 nft_image_low_res_path = path.join(
@@ -108,15 +110,11 @@ class Command(BaseCommand):
                 )
                 nft_image_low_res_response = requests.post(
                     settings.IPFS_URL + "/add",
-                    files=dict(file=open(nft_image_low_res_path, "rb"))
+                    files=dict(file=open(nft_image_low_res_path, "rb")),
                 )
 
                 nft.image_ipfs_uri = nft_image_response.json()['Hash']
-                nft.image_low_res_ipfs_uri = (
-                    nft_image_low_res_response.json()['Hash']
-                )
+                nft.image_low_res_ipfs_uri = nft_image_low_res_response.json()['Hash']
 
                 nft.save()
-                self.stdout.write(
-                    self.style.SUCCESS(nft_file_name)
-                )
+                self.stdout.write(self.style.SUCCESS(nft_file_name))
