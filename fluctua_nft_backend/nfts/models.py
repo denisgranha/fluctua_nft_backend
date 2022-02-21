@@ -16,7 +16,9 @@ class Nft(models.Model):
     description = models.TextField()
     image_ipfs_uri = models.CharField(max_length=46, null=True)
     image_low_res_ipfs_uri = models.CharField(max_length=46, null=True)
-    nft_type = models.ForeignKey('NftType', on_delete=models.CASCADE, related_name="nfttype")
+    nft_type = models.ForeignKey(
+        "NftType", on_delete=models.CASCADE, related_name="nfttype"
+    )
 
     # Add methods to return ipfs url through gateway
 
