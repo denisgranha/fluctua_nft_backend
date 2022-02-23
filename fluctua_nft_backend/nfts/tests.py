@@ -17,3 +17,10 @@ class NftModelsTest(TestCase):
         factories.NftFactory(nft_type=nft_type)
         self.assertAlmostEquals(1, len(models.Nft.objects.all()))
         self.assertEquals(1, len(models.NftType.objects.all()))
+
+    def test_tx_hash_field(self):
+        nft_type = factories.NftTypeFactory()
+        nft = factories.NftFactory(nft_type=nft_type)
+
+        nft.mint_tx = "0x0000000000000000000000000000000000000000000000000000000000000000"
+        nft.save()

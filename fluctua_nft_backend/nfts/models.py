@@ -1,4 +1,5 @@
 from django.db import models
+from gnosis.eth.django import models as gnosis_models
 
 
 class NftType(models.Model):
@@ -20,6 +21,7 @@ class Nft(models.Model):
     nft_type = models.ForeignKey(
         "NftType", on_delete=models.CASCADE, related_name="nfttype"
     )
+    mint_tx = gnosis_models.Keccak256Field(null=True)
 
     # Add methods to return ipfs url through gateway
 
