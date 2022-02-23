@@ -1,34 +1,30 @@
-ARG PYTHON_VERSION=3.9-slim-bullseye
-
-# define an alias for the specfic python version used in this file.
-FROM python:${PYTHON_VERSION} as python
-
-
 # Python build stage
-FROM python as python-build-stage
+FROM python:3.10-slim as python-build-stage
 
-ENV PYTHONDONTWRITEBYTECODE 1
-
-RUN apt-get update && apt-get install --no-install-recommends -y \
-  # dependencies for building Python packages
-  build-essential \
-  # psycopg2 dependencies
-  libpq-dev \
-  # cleaning up unused files
-  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && rm -rf /var/lib/apt/lists/*
+ARG BUILD_ENVIRONMENT=production
+ENV PYTHONUNBUFFERED 1
 
 # Requirements are installed here to ensure they will be cached.
-COPY ./requirements /requirements
+COPY ./requirements .
 
-# create python dependency wheels
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels  \
-  -r /requirements/local.txt -r /requirements/production.txt \
-  && rm -rf /requirements
+RUN set -ex \
+	&& buildDeps=" \
+		build-essential \
+    git \
+		libssl-dev \
+    libpq-dev \
+		" \
+  # Install apt packages
+  && apt-get update \
+  && apt-get install --no-install-recommends -y $buildDeps \
+  # make sure you have the latest packaging tools
+  && pip install -U --no-cache-dir wheel setuptools pip \
+  # Create Python Dependency and Sub-Dependency Wheels.
+  && pip wheel --wheel-dir /usr/src/app/wheels -r ${BUILD_ENVIRONMENT}.txt
 
 
 # Python 'run' stage
-FROM python as python-run-stage
+FROM python:3.10-slim as python-run-stage
 
 ARG BUILD_ENVIRONMENT
 ENV PYTHONUNBUFFERED 1

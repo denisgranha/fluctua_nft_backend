@@ -1,24 +1,27 @@
-ARG PYTHON_VERSION=3.9-slim-bullseye
-
-
-
-# define an alias for the specfic python version used in this file.
-FROM python:${PYTHON_VERSION} as python
-
-# Python build stage
-FROM python as python-build-stage
+FROM python:3.10-slim as python-build-stage
 
 ARG BUILD_ENVIRONMENT=production
 
-# Install apt packages
-RUN apt-get update && apt-get install --no-install-recommends -y \
-  # dependencies for building Python packages
-  build-essential \
-  # psycopg2 dependencies
-  libpq-dev
-
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements .
+
+RUN set -ex \
+	&& buildDeps=" \
+		build-essential \
+    git \
+		libssl-dev \
+    libpq-dev \
+		" \
+  # Install apt packages
+  && apt-get update \
+  && apt-get install --no-install-recommends -y $buildDeps \
+  # make sure you have the latest packaging tools
+  && pip install -U --no-cache-dir wheel setuptools pip \
+  # Create Python Dependency and Sub-Dependency Wheels.
+  && pip wheel --wheel-dir /usr/src/app/wheels -r ${BUILD_ENVIRONMENT}.txt
+
+# make sure you have the latest packaging tools
+RUN pip install -U --no-cache-dir wheel setuptools pip
 
 # Create Python Dependency and Sub-Dependency Wheels.
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
@@ -26,7 +29,7 @@ RUN pip wheel --wheel-dir /usr/src/app/wheels  \
 
 
 # Python 'run' stage
-FROM python as python-run-stage
+FROM python:3.10-slim as python-run-stage
 
 ARG BUILD_ENVIRONMENT=production
 ARG APP_HOME=/app
@@ -47,9 +50,14 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   libpq-dev \
   # Translations dependencies
   gettext \
+  # postgresql so we can do dbshell
+  postgresql \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
+
+# make sure you have the latest packaging tools
+RUN pip install --upgrade pip setuptools
 
 # All absolute dir copies ignore workdir instruction. All relative dir copies are wrt to the workdir instruction
 # copy python dependency wheels from python-build-stage
