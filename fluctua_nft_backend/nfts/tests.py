@@ -22,5 +22,7 @@ class NftModelsTest(TestCase):
         nft_type = factories.NftTypeFactory()
         nft = factories.NftFactory(nft_type=nft_type)
 
-        nft.mint_tx = "0x0000000000000000000000000000000000000000000000000000000000000000"
+        nft.mint_tx = (
+            "0x0000000000000000000000000000000000000000000000000000000000000000"
+        )
         nft.save()

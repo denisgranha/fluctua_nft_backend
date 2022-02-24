@@ -1,13 +1,13 @@
-from django.core.management.base import BaseCommand  # CommandError
-from django.conf import settings
-from django.core.paginator import Paginator
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
 import json
 from os import path
 
-from fluctua_nft_backend.nfts import models
-from fluctua_nft_backend.nfts import tasks
+from django.conf import settings
+from django.core.management.base import BaseCommand  # CommandError
+from django.core.paginator import Paginator
+from web3 import Web3
+from web3.middleware import geth_poa_middleware
+
+from fluctua_nft_backend.nfts import models, tasks
 
 
 class Command(BaseCommand):
@@ -32,7 +32,9 @@ class Command(BaseCommand):
 
         for batch in range(batches):
             # load abi
-            abi_path = path.join(path.dirname(__file__), "..", "..", "contracts", "RumiaNFT.json")
+            abi_path = path.join(
+                path.dirname(__file__), "..", "..", "contracts", "RumiaNFT.json"
+            )
             with open(abi_path) as f:
                 abi = json.load(f)["abi"]
 
@@ -43,24 +45,29 @@ class Command(BaseCommand):
 
             paginated_nfts = paginator.get_page(batch).object_list
 
-            uris = list(paginated_nfts.values_list('metadata_ipfs_uri', flat=True))
+            uris = list(paginated_nfts.values_list("metadata_ipfs_uri", flat=True))
 
             formated_uris = ["ipfs://" + uri for uri in uris]
 
-            self.stdout.write("%s %s" % (self.style.SUCCESS(formated_uris), settings.ETHEREUM_ACCOUNT))
+            self.stdout.write(
+                "%s %s" % (self.style.SUCCESS(formated_uris), settings.ETHEREUM_ACCOUNT)
+            )
 
             mint_tx_object = nft_contract.functions.safeMintBatch(
-                settings.ETHEREUM_ACCOUNT,
-                formated_uris
+                settings.ETHEREUM_ACCOUNT, formated_uris
             ).buildTransaction({"from": settings.ETHEREUM_ACCOUNT})
 
-            mint_tx_object.update({'nonce': w3.eth.get_transaction_count(settings.ETHEREUM_ACCOUNT)})
+            mint_tx_object.update(
+                {'nonce': w3.eth.get_transaction_count(settings.ETHEREUM_ACCOUNT)}
+            )
 
-            signed_tx = w3.eth.account.sign_transaction(mint_tx_object, settings.ETHEREUM_PRIVATE_KEY)
+            signed_tx = w3.eth.account.sign_transaction(
+                mint_tx_object, settings.ETHEREUM_PRIVATE_KEY
+            )
             txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
             # 3. update all nfts with their respective tx
-            pks_to_update = paginated_nfts.values_list('id', flat=True)
+            pks_to_update = paginated_nfts.values_list("id", flat=True)
             models.Nft.objects.filter(id__in=pks_to_update).update(mint_tx=txn_hash)
 
         # 4. signal celery task that check’s tx status every 5s

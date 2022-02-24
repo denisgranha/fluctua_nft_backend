@@ -1,9 +1,11 @@
-from config import celery_app
-from django.conf import settings
 import logging
+
+from django.conf import settings
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
 from web3.exceptions import TimeExhausted
+from web3.middleware import geth_poa_middleware
+
+from config import celery_app
 
 from . import models
 
@@ -23,7 +25,9 @@ def check_mint_status(self):
     # look for receipt of each mint_tx
     for tx in mint_tx_hashes:
         try:
-            w3.eth.wait_for_transaction_receipt(tx, int(settings.ETHEREUM_TX_RECEIPT_TIMEOUT))
+            w3.eth.wait_for_transaction_receipt(
+                tx, int(settings.ETHEREUM_TX_RECEIPT_TIMEOUT)
+            )
             # update model objects
             nfts.filter(mint_tx=tx).update(is_minted=True)
         except TimeExhausted:
