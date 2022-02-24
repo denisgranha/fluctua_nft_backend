@@ -33,6 +33,11 @@ class Command(BaseCommand):
             )
         )
 
+        # ipfs basic_auth
+        ipfs_auth = None
+        if settings.IPFS_USER_NAME and settings.IPFS_USER_PASSWORD:
+            ipfs_auth = requests.auth.HTTPBasicAuth(settings.IPFS_USER_NAME, settings.IPFS_USER_PASSWORD)  
+
         # loop NFT Type folders
         for dirname in root_path_dirs:
             # read spec.json
@@ -55,6 +60,7 @@ class Command(BaseCommand):
             type_representative_response = requests.post(
                 settings.IPFS_URL + "/add",
                 files=dict(file=open(type_representative_path, "rb")),
+                auth=ipfs_auth,
             )
 
             type_representative_low_res_path = path.join(
@@ -63,6 +69,7 @@ class Command(BaseCommand):
             type_representative_low_res_response = requests.post(
                 settings.IPFS_URL + "/add",
                 files=dict(file=open(type_representative_low_res_path, "rb")),
+                auth=ipfs_auth,
             )
 
             type_representative_hash = type_representative_response.json()["Hash"]
@@ -103,6 +110,7 @@ class Command(BaseCommand):
                 nft_image_response = requests.post(
                     settings.IPFS_URL + "/add",
                     files=dict(file=open(nft_image_path, "rb")),
+                    auth=ipfs_auth,
                 )
 
                 nft_image_low_res_path = path.join(
@@ -111,6 +119,7 @@ class Command(BaseCommand):
                 nft_image_low_res_response = requests.post(
                     settings.IPFS_URL + "/add",
                     files=dict(file=open(nft_image_low_res_path, "rb")),
+                    auth=ipfs_auth,
                 )
 
                 nft.image_ipfs_uri = nft_image_response.json()["Hash"]
@@ -126,6 +135,7 @@ class Command(BaseCommand):
                 nft_metadata_response = requests.post(
                     settings.IPFS_URL + "/add",
                     files=dict(file=json.dumps(nft_metadata, indent=4)),
+                    auth=ipfs_auth,
                 )
 
                 nft.metadata_ipfs_uri = nft_metadata_response.json()["Hash"]

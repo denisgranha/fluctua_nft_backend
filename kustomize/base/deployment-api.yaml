@@ -107,6 +107,16 @@ spec:
             secretKeyRef:
               name: fluctua-nfts
               key: NFT_ADDRESS
+        - name: IPFS_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: IPFS_USER_NAME
+        - name: IPFS_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: IPFS_USER_PASSWORD
       - name: nginx
         image: nginx:1.19-alpine
         imagePullPolicy: 'IfNotPresent'
