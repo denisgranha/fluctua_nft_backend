@@ -7,6 +7,7 @@ import json
 from os import path
 
 from fluctua_nft_backend.nfts import models
+from fluctua_nft_backend.nfts import tasks
 
 
 class Command(BaseCommand):
@@ -44,11 +45,13 @@ class Command(BaseCommand):
 
             uris = list(paginated_nfts.values_list('metadata_ipfs_uri', flat=True))
 
-            self.stdout.write("%s %s" % (self.style.SUCCESS(uris), settings.ETHEREUM_ACCOUNT))
+            formated_uris = ["ipfs://" + uri for uri in uris]
+
+            self.stdout.write("%s %s" % (self.style.SUCCESS(formated_uris), settings.ETHEREUM_ACCOUNT))
 
             mint_tx_object = nft_contract.functions.safeMintBatch(
                 settings.ETHEREUM_ACCOUNT,
-                uris
+                formated_uris
             ).buildTransaction({"from": settings.ETHEREUM_ACCOUNT})
 
             mint_tx_object.update({'nonce': w3.eth.get_transaction_count(settings.ETHEREUM_ACCOUNT)})
@@ -60,4 +63,5 @@ class Command(BaseCommand):
             pks_to_update = paginated_nfts.values_list('id', flat=True)
             models.Nft.objects.filter(id__in=pks_to_update).update(mint_tx=txn_hash)
 
-            # 4. signal celery task that check’s tx status every 5s
+        # 4. signal celery task that check’s tx status every 5s
+        tasks.check_mint_status.delay()

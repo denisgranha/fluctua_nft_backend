@@ -9,6 +9,14 @@
                 "backgroundColor": "#ffffff",
                 "theme": "What A Show"
             }
+        },
+        {
+            "name": "NFT Name 2",
+            "description": "NFT 2 Lorem Ipsum...",
+            "extra": {
+                "backgroundColor": "#ffffff",
+                "theme": "What A Show 2"
+            }
         }
     ]
 }

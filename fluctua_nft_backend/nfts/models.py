@@ -22,6 +22,7 @@ class Nft(models.Model):
         "NftType", on_delete=models.CASCADE, related_name="nfttype"
     )
     mint_tx = gnosis_models.Keccak256Field(null=True)
+    is_minted = models.BooleanField(default=False)
 
     # Add methods to return ipfs url through gateway
 
