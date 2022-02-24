@@ -3,7 +3,7 @@ from gnosis.eth.django import models as gnosis_models
 
 
 class NftType(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=60)
     description = models.TextField()
     representative_image_ipfs_uri = models.CharField(max_length=46, null=True)
     representative_image_low_res_ipfs_uri = models.CharField(max_length=46, null=True)
@@ -13,7 +13,7 @@ class NftType(models.Model):
 
 
 class Nft(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=60)
     description = models.TextField()
     image_ipfs_uri = models.CharField(max_length=46, null=True)
     image_low_res_ipfs_uri = models.CharField(max_length=46, null=True)
