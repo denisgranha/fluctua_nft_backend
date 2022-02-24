@@ -58,7 +58,7 @@ class Command(BaseCommand):
             ).buildTransaction({"from": settings.ETHEREUM_ACCOUNT})
 
             mint_tx_object.update(
-                {'nonce': w3.eth.get_transaction_count(settings.ETHEREUM_ACCOUNT)}
+                {"nonce": w3.eth.get_transaction_count(settings.ETHEREUM_ACCOUNT)}
             )
 
             signed_tx = w3.eth.account.sign_transaction(
