@@ -35,3 +35,24 @@ class User(models.Model):
     spotify_access_token = models.CharField(max_length=200, null=True)
     spotify_refresh_token = models.CharField(max_length=200, null=True)
     ethereum_address = gnosis_models.EthereumAddressV2Field()
+
+    def __str__(self):
+        return self.email
+
+
+class NftClaim(models.Model):
+    class Meta:
+        unique_together = (("nft", "user"),)
+    nft = models.ForeignKey(
+        Nft, on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE
+    )
+    tx_hash = gnosis_models.Keccak256Field(null=True)
+    tx_mined = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Claim %s - %s" % (self.user.email, self.nft.id)

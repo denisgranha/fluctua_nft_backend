@@ -35,3 +35,8 @@ def check_mint_status(self):
             logger.error("Tx %s did timeout for receipt" % tx)
             # delay task check 15s
             self.retry(exc=TimeExhausted)
+
+@celery_app.task(bind=True, default_retry_delay=5, retry_backoff=True, max_retry=5)
+def send_nfts_to_users(self):
+    # Those tokens that have a
+    pass

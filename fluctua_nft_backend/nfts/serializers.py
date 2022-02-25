@@ -8,7 +8,7 @@ from hexbytes import HexBytes
 from rest_framework import serializers
 from web3 import Web3
 
-from . import models, eip712_signatures
+from . import models, eip712_signatures, tasks
 
 logger = logging.getLogger(__name__)
 spotify_api_base_path = "https://accounts.spotify.com/api"
@@ -19,6 +19,7 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
     email = serializers.EmailField()
     spotify_token = serializers.CharField(max_length=500)
     proof = serializers.CharField(max_length=132)
+    nft = serializers.IntegerField(min_value=0)
 
     def validate_email_unique(self, value):
         if models.User.objects.filter(email=value).count():
@@ -43,13 +44,16 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
             logger.error(token_response.json())
             raise serializers.ValidationError("Spotify Token or Config not valid")
 
+        # check permissions are enough so we can change user library
+        scopes = token_response.json()["scope"]
+        if "user-library-modify" not in scopes:
+            raise serializers.ValidationError("Spotify Token Doesn't allow user-library-modify scope")
+
         logger.info(token_response.json())
         refresh_token = token_response.json()["refresh_token"]
         access_token = token_response.json()["access_token"]
 
         return {"access_token": access_token, "refresh_token": refresh_token}
-
-        # @todo: check permissions are enough so we can change user library
 
     def validate_proof(self, value):
         eip_struct = eip712_signatures.SpotifyPresaveEIP712(email=self.initial_data["email"])
@@ -60,9 +64,14 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
         logger.info(wallet_address)
         return wallet_address
 
+    def validate_nft(self, value):
+        return models.Nft.objects.get(id=value)
+
+
     def create(self, validated_data):
         self.fields.pop("spotify_token")
         self.fields.pop("proof")
+        self.fields.pop("nft")
         user = models.User.objects.create(
             email=validated_data["email"],
             ethereum_address=validated_data["proof"],
@@ -70,5 +79,11 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
             spotify_refresh_token=validated_data["spotify_token"]["refresh_token"]
         )
 
+        models.NftClaim.objects.create(
+            user=user,
+            nft=validated_data["nft"]
+        )
+
         # Trigger async tasks for transfer NFT / Claim
+        tasks.send_nfts_to_users.delay()
         return user
