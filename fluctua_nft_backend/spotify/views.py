@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+from django.conf import settings
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,7 +18,7 @@ class InfoView(APIView):
         query = {
             "scope": "user-library-modify user-read-email",
             "response_type": "code",
-            "client_id": "92fec7cd91604f69a1d9a2327d7c515c",
+            "client_id": settings.SPOTIFY_CLIENT_ID,
         }
         content = {
             "authorizationUrl": "https://accounts.spotify.com/en/authorize?"

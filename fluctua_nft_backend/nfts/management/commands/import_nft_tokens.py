@@ -36,7 +36,7 @@ class Command(BaseCommand):
         # ipfs basic_auth
         ipfs_auth = None
         if settings.IPFS_USER_NAME and settings.IPFS_USER_PASSWORD:
-            ipfs_auth = requests.auth.HTTPBasicAuth(settings.IPFS_USER_NAME, settings.IPFS_USER_PASSWORD)  
+            ipfs_auth = requests.auth.HTTPBasicAuth(settings.IPFS_USER_NAME, settings.IPFS_USER_PASSWORD)
 
         # loop NFT Type folders
         for dirname in root_path_dirs:
@@ -126,10 +126,12 @@ class Command(BaseCommand):
                 nft.image_low_res_ipfs_uri = nft_image_low_res_response.json()["Hash"]
 
                 # Create NFT Metadata json
-                nft_metadata = nft_dict["extra"]
-                nft_metadata["name"] = nft_dict["name"]
-                nft_metadata["description"] = nft_dict["description"]
-                nft_metadata["image"] = "ipfs://" + nft.image_ipfs_uri
+                nft_metadata = {
+                    "name": nft_dict["name"],
+                    "description": nft_dict["description"],
+                    "image": "ipfs://" + nft.image_ipfs_uri,
+                    "attributes": nft_dict["extra"]
+                }
 
                 # upload metadata to ipfs
                 nft_metadata_response = requests.post(

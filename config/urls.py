@@ -44,6 +44,10 @@ urlpatterns_v1 = [
     path(
         "spotify/",
         include("fluctua_nft_backend.spotify.urls", namespace="spotify"),
+    ),
+    path(
+        "nft/",
+        include("fluctua_nft_backend.nfts.urls", namespace="nfts"),
     )
 ]
 

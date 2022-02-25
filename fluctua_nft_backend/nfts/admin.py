@@ -13,3 +13,7 @@ class NftAdmin(admin.ModelAdmin):
 @admin.register(models.NftType)
 class NftTypeAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(models.User)
+class UserAdmin(admin.ModelAdmin):
+    pass

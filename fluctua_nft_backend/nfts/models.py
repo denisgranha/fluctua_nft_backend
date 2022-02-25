@@ -28,3 +28,10 @@ class Nft(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class User(models.Model):
+    email = models.EmailField(unique=True)
+    spotify_access_token = models.CharField(max_length=200, null=True)
+    spotify_refresh_token = models.CharField(max_length=200, null=True)
+    ethereum_address = gnosis_models.EthereumAddressV2Field()
