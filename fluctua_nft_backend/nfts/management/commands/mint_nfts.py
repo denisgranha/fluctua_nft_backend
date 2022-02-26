@@ -53,6 +53,9 @@ class Command(BaseCommand):
                 "%s %s" % (self.style.SUCCESS(formated_uris), settings.ETHEREUM_ACCOUNT)
             )
 
+            # get current nft count, so we calculate the contract ids for our new tokens
+            initial_nft_contract_id = nft_contract.functions.totalSupply().call()
+
             mint_tx_object = nft_contract.functions.safeMintBatch(
                 settings.ETHEREUM_ACCOUNT, formated_uris
             ).buildTransaction({"from": settings.ETHEREUM_ACCOUNT})
@@ -67,8 +70,12 @@ class Command(BaseCommand):
             txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
             # 3. update all nfts with their respective tx
-            pks_to_update = paginated_nfts.values_list("id", flat=True)
-            models.Nft.objects.filter(id__in=pks_to_update).update(mint_tx=txn_hash)
+            for nft_index, nft in enumerate(paginated_nfts):
+                # models.Nft.objects.filter(id__in=pks_to_update).update(mint_tx=txn_hash)
+                nft.mint_tx = txn_hash
+                nft.contract_id = initial_nft_contract_id + nft_index
+
+            models.Nft.objects.bulk_update(paginated_nfts, ["mint_tx", "contract_id"])
 
         # 4. signal celery task that check’s tx status every 5s
         tasks.check_mint_status.delay()

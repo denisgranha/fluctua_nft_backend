@@ -17,12 +17,13 @@ class Nft(models.Model):
     description = models.TextField()
     image_ipfs_uri = models.CharField(max_length=46, null=True)
     image_low_res_ipfs_uri = models.CharField(max_length=46, null=True)
-    metadata_ipfs_uri = models.CharField(max_length=46)
+    metadata_ipfs_uri = models.CharField(max_length=46, unique=True)
     nft_type = models.ForeignKey(
         "NftType", on_delete=models.CASCADE, related_name="nfttype"
     )
     mint_tx = gnosis_models.Keccak256Field(null=True)
     is_minted = models.BooleanField(default=False)
+    contract_id = models.IntegerField(null=True)  # to be set by mint tx check
 
     # Add methods to return ipfs url through gateway
 

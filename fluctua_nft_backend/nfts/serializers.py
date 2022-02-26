@@ -3,8 +3,7 @@ import logging
 
 import requests
 from django.conf import settings
-from eth_account.messages import encode_defunct
-from hexbytes import HexBytes
+from eth_account.messages import encode_structured_data
 from rest_framework import serializers
 from web3 import Web3
 
@@ -16,14 +15,11 @@ spotify_api_base_path = "https://accounts.spotify.com/api"
 
 class SpotifyPreSaveSerializer(serializers.Serializer):
 
-    email = serializers.EmailField()
-    spotify_token = serializers.CharField(max_length=500)
-    proof = serializers.CharField(max_length=132)
-    nft = serializers.IntegerField(min_value=0)
-
-    def validate_email_unique(self, value):
-        if models.User.objects.filter(email=value).count():
-            raise serializers.ValidationError("Email already in use")
+    email = serializers.EmailField(required=True)
+    spotify_token = serializers.CharField(max_length=500, required=True)
+    proof = serializers.CharField(max_length=132, required=True)
+    nft = serializers.IntegerField(min_value=0, required=True)
+    ethereum_address = serializers.CharField(min_length=42, max_length=42, required=True)
 
     def validate_spotify_token(self, value):
         # generate spotify auth token
@@ -56,28 +52,44 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
         return {"access_token": access_token, "refresh_token": refresh_token}
 
     def validate_proof(self, value):
-        eip_struct = eip712_signatures.SpotifyPresaveEIP712(email=self.initial_data["email"])
+        eip_struct = eip712_signatures.Person(email=self.initial_data.get("email"))
         message = eip_struct.get_message()
         w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL))
-        wallet_address = w3.eth.account.recover_message(encode_defunct(message), signature=HexBytes(value))
+        wallet_address = w3.eth.account.recover_message(encode_structured_data(message), signature=value)
 
+        if self.initial_data.get("ethereum_address") != wallet_address:
+            raise serializers.ValidationError("Ethereum Address Differs from signature")
         logger.info(wallet_address)
         return wallet_address
 
     def validate_nft(self, value):
-        return models.Nft.objects.get(id=value)
+        # There cannot be current claims for that nft
+        if models.NftClaim.objects.filter(nft__contract_id=value).exists():
+            raise serializers.ValidationError("NFT was already picked, please choose another one")
+        if not models.Nft.objects.filter(contract_id=value).exists():
+            raise serializers.ValidationError("NFT ID doesn't exist")
+        return models.Nft.objects.get(contract_id=value)
 
-
+    # create or update user
     def create(self, validated_data):
         self.fields.pop("spotify_token")
         self.fields.pop("proof")
         self.fields.pop("nft")
-        user = models.User.objects.create(
-            email=validated_data["email"],
-            ethereum_address=validated_data["proof"],
-            spotify_access_token=validated_data["spotify_token"]["access_token"],
-            spotify_refresh_token=validated_data["spotify_token"]["refresh_token"]
-        )
+        self.fields.pop("ethereum_address")
+        if models.User.objects.filter(email=validated_data["email"]).exists():
+            user = models.User.objects.get(email=validated_data["email"])
+            user.ethereum_address = validated_data["proof"]
+            user.spotify_access_token = validated_data["spotify_token"]["access_token"]
+            user.spotify_refresh_token = validated_data["spotify_token"]["refresh_token"]
+
+            user.save()
+        else:
+            user = models.User.objects.create(
+                email=validated_data["email"],
+                ethereum_address=validated_data["proof"],
+                spotify_access_token=validated_data["spotify_token"]["access_token"],
+                spotify_refresh_token=validated_data["spotify_token"]["refresh_token"]
+            )
 
         models.NftClaim.objects.create(
             user=user,
