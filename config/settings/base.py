@@ -267,6 +267,8 @@ SWAGGER_SETTINGS = {
     },
 }
 
+CORS_ALLOW_ALL_ORIGINS=True
+
 IPFS_URL = env("IPFS_URL", default="https://ipfs.infura.io:5001/api/v0")
 
 NFT_ADDRESS = env("NFT_ADDRESS")
