@@ -118,25 +118,25 @@ spec:
               name: fluctua-nfts
               key: IPFS_USER_PASSWORD
         - name: IPFS_USER_NAME
-            valueFrom:
-              secretKeyRef:
-                name: fluctua-nfts
-                key: IPFS_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: IPFS_USER_NAME
         - name: SPOTIFY_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: fluctua-nfts
-                key: SPOTIFY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: SPOTIFY_CLIENT_ID
         - name: SPOTIFY_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: fluctua-nfts
-                key: SPOTIFY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: SPOTIFY_SECRET
         - name: FRONTEND_URL
-            valueFrom:
-              secretKeyRef:
-                name: fluctua-nfts
-                key: FRONTEND_URL
+          valueFrom:
+            secretKeyRef:
+              name: fluctua-nfts
+              key: FRONTEND_URL
       - name: nginx
         image: nginx:1.19-alpine
         imagePullPolicy: 'IfNotPresent'
