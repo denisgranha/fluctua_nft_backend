@@ -4,6 +4,8 @@ import logging
 import requests
 from django.conf import settings
 from eth_account.messages import encode_structured_data
+from gnosis.eth.django.models import EthereumAddressV2Field as EthereumAddressDbField
+from gnosis.eth.django.models import Keccak256Field as Keccak256DbField
 from rest_framework import serializers
 from web3 import Web3
 
@@ -13,7 +15,18 @@ logger = logging.getLogger(__name__)
 spotify_api_base_path = "https://accounts.spotify.com/api"
 
 
+class BaseModelSerializer(serializers.ModelSerializer):
+    serializer_field_mapping = (
+        serializers.ModelSerializer.serializer_field_mapping.copy()
+    )
+    serializer_field_mapping[EthereumAddressDbField] = serializers.CharField
+    serializer_field_mapping[Keccak256DbField] = serializers.CharField
+
+
 class SpotifyPreSaveSerializer(serializers.Serializer):
+
+    def update(self, instance, validated_data):
+        pass
 
     email = serializers.EmailField(required=True)
     spotify_token = serializers.CharField(max_length=500, required=True)
@@ -99,3 +112,15 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
         # Trigger async tasks for transfer NFT / Claim
         tasks.send_nfts_to_users.delay()
         return user
+
+
+class NftSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.Nft
+        fields = "__all__"
+
+
+class NftTypeSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.NftType
+        fields = "__all__"
