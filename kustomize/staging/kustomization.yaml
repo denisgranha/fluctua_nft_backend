@@ -6,11 +6,6 @@ namespace: staging
 patches:
   - patch: |-
       - op: replace
-        path: /metadata/annotations
-        value:
-          fluxcd.io/automated: "true"
-          fluxcd.io/tag.fluctua-nfts: regex:^staging.*
-      - op: replace
         path: /spec/template/spec/containers/0/env/5/value
         value: redis://staging-redis:6379/0
     target:
@@ -18,19 +13,15 @@ patches:
       name: api-deployment
   - patch: |-
       - op: replace
-        path: /metadata/annotations
-        value:
-          fluxcd.io/automated: "true"
-          fluxcd.io/tag.celery-beat: regex:^staging.*
-    target:
-      kind: Deployment
-      name: celery-beat
-  - patch: |-
-      - op: replace
-        path: /metadata/annotations
-        value:
-          fluxcd.io/automated: "true"
-          fluxcd.io/tag.celery-worker: regex:^staging.*
-    target:
+        path: /spec/template/spec/containers/0/env/4/value
+        value: redis://staging-redis:6379/0
+      target:
       kind: Deployment
       name: celery-worker
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/4/value
+        value: redis://staging-redis:6379/0
+      target:
+      kind: Deployment
+      name: celery-beat
