@@ -16,3 +16,9 @@ class NftListView(ListAPIView):
 class NftTypeListView(ListAPIView):
     queryset = models.NftType.objects.all()
     serializer_class = serializers.NftTypeSerializer
+
+
+class NftClaimListView(ListAPIView):
+    queryset = models.NftClaim.objects.all()
+    serializer_class = serializers.NftClaimSerializer
+    filterset_fields = ["user__email", "nft__contract_id", "nft__nft_type"]

@@ -155,3 +155,9 @@ class NftTypeSerializer(BaseModelSerializer):
         )
 
         return base_representation
+
+
+class NftClaimSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.NftClaim
+        fields = "__all__"
