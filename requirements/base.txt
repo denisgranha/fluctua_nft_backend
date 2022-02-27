@@ -16,6 +16,7 @@ web3==5.28.0 # https://github.com/ethereum/web3.py
 gnosis-py[django]==3.8.1 # https://github.com/gnosis/gnosis-py
 eip712-structs==1.1.0 # https://github.com/ConsenSysMesh/py-eip712-structs
 eth-account==0.5.7 # https://github.com/ethereum/eth-account
+py-cid==0.3.0 # https://github.com/ipld/py-cid
 
 # Django
 # ------------------------------------------------------------------------------

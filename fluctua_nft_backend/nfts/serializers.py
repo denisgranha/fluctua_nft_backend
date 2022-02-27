@@ -2,6 +2,7 @@ from enum import unique
 import logging
 
 import requests
+from cid import make_cid
 from django.conf import settings
 from eth_account.messages import encode_structured_data
 from gnosis.eth.django.models import EthereumAddressV2Field as EthereumAddressDbField
@@ -114,13 +115,43 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
         return user
 
 
+def format_ifps(ifps_uri_cid0):
+    return make_cid(ifps_uri_cid0).to_v1().encode("base32").decode("utf-8")
+
+
 class NftSerializer(BaseModelSerializer):
     class Meta:
         model = models.Nft
         fields = "__all__"
+
+    def to_representation(self, instance):
+        base_representation = super().to_representation(instance)
+        base_representation["image_ipfs_uri"] = format_ifps(
+            base_representation["image_ipfs_uri"]
+        )
+        base_representation["image_low_res_ipfs_uri"] = format_ifps(
+            base_representation["image_low_res_ipfs_uri"]
+        )
+        base_representation["metadata_ipfs_uri"] = format_ifps(
+            base_representation["metadata_ipfs_uri"]
+        )
+
+        return base_representation
 
 
 class NftTypeSerializer(BaseModelSerializer):
     class Meta:
         model = models.NftType
         fields = "__all__"
+
+    def to_representation(self, instance):
+        base_representation = super().to_representation(instance)
+        base_representation["representative_image_low_res_ipfs_uri"] = format_ifps(
+            base_representation["representative_image_low_res_ipfs_uri"]
+        )
+
+        base_representation["representative_image_ipfs_uri"] = format_ifps(
+            base_representation["representative_image_ipfs_uri"]
+        )
+
+        return base_representation
