@@ -15,13 +15,13 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/4/value
         value: redis://staging-redis:6379/0
-      target:
+    target:
       kind: Deployment
       name: celery-worker
   - patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/4/value
         value: redis://staging-redis:6379/0
-      target:
+    target:
       kind: Deployment
       name: celery-beat
