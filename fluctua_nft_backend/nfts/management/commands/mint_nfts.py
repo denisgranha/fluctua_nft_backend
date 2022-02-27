@@ -1,4 +1,5 @@
 import json
+import time
 from os import path
 
 from django.conf import settings
@@ -24,6 +25,8 @@ class Command(BaseCommand):
         if nfts.count():
             self.stdout.write(self.style.SUCCESS("%s NFTs not minted" % nfts.count()))
             batches = (nfts.count() // 50) + 1
+            if nfts.count() % 50:
+                batches -= 1
         else:
             batches = 0
 
@@ -74,6 +77,9 @@ class Command(BaseCommand):
                 # models.Nft.objects.filter(id__in=pks_to_update).update(mint_tx=txn_hash)
                 nft.mint_tx = txn_hash
                 nft.contract_id = initial_nft_contract_id + nft_index
+
+                # sleep for a few seconds, so it doesn't have issues with nonce
+                time.sleep(5)
 
             models.Nft.objects.bulk_update(paginated_nfts, ["mint_tx", "contract_id"])
 
