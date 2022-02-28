@@ -10,7 +10,11 @@ class PreSaveView(CreateAPIView):
 class NftListView(ListAPIView):
     queryset = models.Nft.objects.all()
     serializer_class = serializers.NftSerializer
-    filterset_fields = ["nft_type", "is_minted", "contract_id"]
+    filterset_fields = {
+        "nft_type": ["exact"],
+        "is_minted": ["exact"],
+        "contract_id": ["exact", "in"],
+    }
 
 
 class NftTypeListView(ListAPIView):

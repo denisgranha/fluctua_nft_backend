@@ -136,6 +136,8 @@ class NftSerializer(BaseModelSerializer):
             base_representation["metadata_ipfs_uri"]
         )
 
+        base_representation["is_claimed"] = instance.nftclaim_set.exists()
+
         return base_representation
 
 
