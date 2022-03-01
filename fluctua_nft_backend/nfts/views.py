@@ -1,6 +1,9 @@
 from rest_framework.generics import CreateAPIView, ListAPIView, GenericAPIView
 from rest_framework import status
 from rest_framework.response import Response
+from gnosis.eth.django.filters import EthereumAddressFilter
+from gnosis.eth.django.models import EthereumAddressV2Field
+import django_filters
 
 from . import serializers, models
 
@@ -24,10 +27,23 @@ class NftTypeListView(ListAPIView):
     serializer_class = serializers.NftTypeSerializer
 
 
+class NftClaimFilter(django_filters.FilterSet):
+    class Meta:
+        model = models.NftClaim
+        fields = {
+            "user__ethereum_address": ["exact"],
+            "nft__contract_id": ["exact"],
+            "nft__nft_type": ["exact"],
+        }
+        filter_overrides = {
+            EthereumAddressV2Field: {"filter_class": EthereumAddressFilter},
+        }
+
+
 class NftClaimListView(ListAPIView):
     queryset = models.NftClaim.objects.all()
     serializer_class = serializers.NftClaimSerializer
-    filterset_fields = ["user__email", "nft__contract_id", "nft__nft_type"]
+    filterset_class = NftClaimFilter
 
 
 class NftContentView(GenericAPIView):
