@@ -21,3 +21,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(models.NftClaim)
 class NftClaimAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.NftClaim._meta.fields]
+
+
+@admin.register(models.NftContent)
+class NftContentAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in models.NftContent._meta.fields]

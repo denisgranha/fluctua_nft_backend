@@ -1,4 +1,5 @@
-from enum import unique
+import json
+from os import path
 import logging
 
 import requests
@@ -9,6 +10,7 @@ from gnosis.eth.django.models import EthereumAddressV2Field as EthereumAddressDb
 from gnosis.eth.django.models import Keccak256Field as Keccak256DbField
 from rest_framework import serializers
 from web3 import Web3
+from web3.middleware import geth_poa_middleware
 
 from . import models, eip712_signatures, tasks
 
@@ -173,3 +175,71 @@ class NftClaimSerializer(BaseModelSerializer):
     class Meta:
         model = models.NftClaim
         fields = "__all__"
+
+
+class NftContentModelSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.NftContent
+        fields = "__all__"
+
+
+class NftContentSerializer(serializers.Serializer):
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+    email = serializers.EmailField(required=True)
+    proof = serializers.CharField(max_length=132, min_length=132, required=True)
+    nft = serializers.IntegerField(min_value=0, required=True)
+    ethereum_address = serializers.CharField(min_length=42, max_length=42, required=True)
+
+    def validate_email(self, value):
+        # Check that user exists and ethereum address is the same
+        users = models.User.objects.filter(email=value, ethereum_address= self.initial_data.get("ethereum_address"))
+
+        if users.count():
+            return value
+        else:
+            raise serializers.ValidationError("User email / ethereum address not found")
+
+    def validate_proof(self, value):
+        eip_struct = eip712_signatures.NftContent(
+            email=self.initial_data.get("email"), nft=self.initial_data.get("nft")
+        )
+        message = eip_struct.get_message()
+        w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL))
+        wallet_address = w3.eth.account.recover_message(encode_structured_data(message), signature=value)
+
+        if self.initial_data.get("ethereum_address") != wallet_address:
+            raise serializers.ValidationError("Ethereum Address Differs from signature")
+        logger.info(wallet_address)
+        return wallet_address
+
+    def validate_nft(self, value):
+        # load abi
+        abi_path = path.join(
+            path.dirname(__file__), "contracts", "RumiaNFT.json"
+        )
+        with open(abi_path) as f:
+            abi = json.load(f)["abi"]
+        # nft must exist, there should be a claim (not necessarily from the user)
+        nfts = models.Nft.objects.filter(contract_id=value)
+        if not nfts.count():
+            raise serializers.ValidationError("NFT doesn't exist")
+
+        if not nfts[0].nftclaim_set.count():
+            raise serializers.ValidationError("NFT not minted")
+
+        # and the blockchain owner should be the user
+        w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL))
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        nft_contract = w3.eth.contract(address=settings.NFT_ADDRESS, abi=abi)
+
+        token_owner = nft_contract.functions.ownerOf(self.initial_data.get("nft")).call()
+        if token_owner != self.initial_data.get("ethereum_address"):
+            raise serializers.ValidationError("Nft not owned by user")
+
+        return value

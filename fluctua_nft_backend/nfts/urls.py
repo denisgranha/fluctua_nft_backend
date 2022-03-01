@@ -8,4 +8,5 @@ urlpatterns = [
     path("", view=views.NftListView.as_view(), name="list-nfts"),
     path("types/", view=views.NftTypeListView.as_view(), name="list-nft-types"),
     path("claims/", view=views.NftClaimListView.as_view(), name="list-nft-claims"),
+    path("content/", view=views.NftContentView.as_view(), name="nft-content"),
 ]

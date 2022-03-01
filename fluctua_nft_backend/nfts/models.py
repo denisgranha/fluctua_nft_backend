@@ -19,7 +19,7 @@ class Nft(models.Model):
     image_low_res_ipfs_uri = models.CharField(max_length=46, null=True)
     metadata_ipfs_uri = models.CharField(max_length=46, unique=True)
     nft_type = models.ForeignKey(
-        "NftType", on_delete=models.CASCADE, related_name="nfttype"
+        "NftType", on_delete=models.CASCADE
     )
     mint_tx = gnosis_models.Keccak256Field(null=True)
     is_minted = models.BooleanField(default=False)
@@ -57,3 +57,17 @@ class NftClaim(models.Model):
 
     def __str__(self):
         return "Claim %s - %s" % (self.user.email, self.nft.id)
+
+
+class NftContent(models.Model):
+    nft_type = models.ForeignKey(
+        NftType, on_delete=models.CASCADE
+    )
+
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    content_url = models.URLField()
+    content_type = models.CharField(max_length=50)
+
+    def __str__(self):
+        return "NFT Content %s " % self.name
