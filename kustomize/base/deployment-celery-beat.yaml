@@ -127,3 +127,5 @@ spec:
             secretKeyRef:
               name: fluctua-nfts
               key: FRONTEND_URL
+        - name: ONLY_ONE_NFT_PER_USER
+          value: "0"
