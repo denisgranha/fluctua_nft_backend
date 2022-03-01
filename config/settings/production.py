@@ -153,3 +153,4 @@ LOGGING = {
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+ONLY_ONE_NFT_PER_USER = env("ONLY_ONE_NFT_PER_USER")

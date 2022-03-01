@@ -25,7 +25,7 @@ class Command(BaseCommand):
         if nfts.count():
             self.stdout.write(self.style.SUCCESS("%s NFTs not minted" % nfts.count()))
             batches = (nfts.count() // 50) + 1
-            if nfts.count() % 50:
+            if (nfts.count() % 50) == 0:
                 batches -= 1
         else:
             batches = 0

@@ -35,6 +35,16 @@ class SpotifyPreSaveSerializer(serializers.Serializer):
     nft = serializers.IntegerField(min_value=0, required=True)
     ethereum_address = serializers.CharField(min_length=42, max_length=42, required=True)
 
+    def validate_email(self, value):
+        users = models.User.objects.filter(email=value)
+        if users.count():
+            if users[0].nftclaim_set.count():
+                # check if its possible to have more than 1 NFT
+                if settings.ONLY_ONE_NFT_PER_USER:
+                    raise serializers.ValidationError("User cannot have more than 1 NFT")
+
+        return value
+
     def validate_spotify_token(self, value):
         # generate spotify auth token
         auth_token_form = {

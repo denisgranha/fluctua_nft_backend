@@ -282,3 +282,4 @@ IPFS_USER_PASSWORD = env("IPFS_USER_PASSWORD", default="")
 SPOTIFY_CLIENT_ID = env("SPOTIFY_CLIENT_ID")
 SPOTIFY_SECRET = env("SPOTIFY_SECRET")
 FRONTEND_URL = env("FRONTEND_URL", default="https://nfts.fluctuarecords.com")
+ONLY_ONE_NFT_PER_USER = False
