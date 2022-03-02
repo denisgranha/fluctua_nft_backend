@@ -59,10 +59,11 @@ def check_mint_status(self):
             # delay task check 15s
             self.retry(exc=TimeExhausted)
 
+
 @celery_app.task(bind=True, default_retry_delay=15, retry_backoff=True, max_retry=20)
 def check_transfer_nft_status(self):
     # Get all NFT Claims without mined status confirmed
-    nft_claims = models.NftClaim.objects.filter(tx_mined=False)
+    nft_claims = models.NftClaim.objects.filter(tx_mined=False, tx_hash__isnull=False)
 
     tx_hashes = list(nft_claims.values_list("tx_hash", flat=True).distinct())
 

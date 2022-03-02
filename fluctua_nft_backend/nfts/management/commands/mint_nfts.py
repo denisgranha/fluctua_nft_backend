@@ -78,10 +78,10 @@ class Command(BaseCommand):
                 nft.mint_tx = txn_hash
                 nft.contract_id = initial_nft_contract_id + nft_index
 
-                # sleep for a few seconds, so it doesn't have issues with nonce
-                time.sleep(5)
-
             models.Nft.objects.bulk_update(paginated_nfts, ["mint_tx", "contract_id"])
+
+            # sleep for a few seconds, so it doesn't have issues with nonce
+            time.sleep(5)
 
         # 4. signal celery task that check’s tx status every 5s
         tasks.check_mint_status.delay()
