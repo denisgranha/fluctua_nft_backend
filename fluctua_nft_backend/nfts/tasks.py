@@ -94,7 +94,8 @@ def send_nfts_to_users(self):
             # Those tokens that have a NftClaim will be transferred over to the user wallet address
             nft_claims = models.NftClaim.objects.filter(tx_hash__isnull=True).order_by("created_at")
             if nft_claims.count():
-                # if more than one claim is missing of the tx_hash, this task will only to one tx, it will pass the request to
+                # if more than one claim is missing of the tx_hash, this task will only to one tx,
+                # it will pass the request to
                 # a new task, with a delay of 5s so the nonce counting collisions are minimized a little
                 nft_claim_to_process = nft_claims[0]
 
@@ -112,8 +113,16 @@ def send_nfts_to_users(self):
 
                 logger.info("Generating claim tx for nft " + str(nft_claim_to_process.nft.contract_id))
                 send_nft_tx_object = nft_contract.functions.safeTransferFrom(
-                    settings.ETHEREUM_ACCOUNT, nft_claim_to_process.user.ethereum_address, nft_claim_to_process.nft.contract_id
-                ).buildTransaction({"from": settings.ETHEREUM_ACCOUNT})
+                    settings.ETHEREUM_ACCOUNT,
+                    nft_claim_to_process.user.ethereum_address,
+                    nft_claim_to_process.nft.contract_id
+                ).buildTransaction(
+                    {
+                        "from": settings.ETHEREUM_ACCOUNT,
+                        'maxFeePerGas': w3.toWei('300', 'gwei'),
+                        'maxPriorityFeePerGas': w3.toWei('100', 'gwei'),
+                    }
+                )
 
                 send_nft_tx_object.update(
                     {"nonce": w3.eth.get_transaction_count(settings.ETHEREUM_ACCOUNT)}
@@ -122,7 +131,11 @@ def send_nfts_to_users(self):
                 signed_tx = w3.eth.account.sign_transaction(
                     send_nft_tx_object, settings.ETHEREUM_PRIVATE_KEY
                 )
-                txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+                try:
+                    txn_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+                except ValueError:
+                    self.retry(exc=ValueError)
 
                 logger.info("Claim tx sent with hash" + str(txn_hash))
 
