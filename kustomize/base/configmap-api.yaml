@@ -37,7 +37,7 @@ data:
 
         server {
             access_log off;
-            listen 8000 deferred proxy_protocol;
+            listen 8000 deferred;
             charset utf-8;
             keepalive_timeout 75s;
 
