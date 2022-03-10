@@ -42,7 +42,7 @@ class Command(BaseCommand):
                 abi = json.load(f)["abi"]
 
             # new mint tx
-            w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL))
+            w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL, request_kwargs={'timeout': 60}))
             w3.middleware_onion.inject(geth_poa_middleware, layer=0)
             nft_contract = w3.eth.contract(address=settings.NFT_ADDRESS, abi=abi)
 
