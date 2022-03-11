@@ -133,7 +133,7 @@ spec:
               name: fluctua-nfts
               key: FRONTEND_URL
         - name: ONLY_ONE_NFT_PER_USER
-          value: "0"
+          value: "1"
       - name: nginx
         image: nginx:1.19-alpine
         imagePullPolicy: 'IfNotPresent'
