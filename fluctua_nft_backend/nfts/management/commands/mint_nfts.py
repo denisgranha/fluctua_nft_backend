@@ -10,6 +10,8 @@ from web3.middleware import geth_poa_middleware
 
 from fluctua_nft_backend.nfts import models, tasks
 
+BATCH_COUNT = 20
+
 
 class Command(BaseCommand):
     help = "Mint non deployed NFT's by triggering celery tasks"
@@ -22,31 +24,35 @@ class Command(BaseCommand):
         # 2. generate 1 or more txs depending on amount of nfts to deploy
         # We cannot use multicall with EOA
         # but we can use the batch mint function of the NFT
+        paginator = Paginator(nfts, BATCH_COUNT)
         if nfts.count():
             self.stdout.write(self.style.SUCCESS("%s NFTs not minted" % nfts.count()))
-            batches = (nfts.count() // 50) + 1
-            if (nfts.count() % 50) == 0:
-                batches -= 1
+            batches = paginator.num_pages
         else:
             batches = 0
 
         self.stdout.write(self.style.SUCCESS("Minting %s batches of NFTs" % batches))
-        paginator = Paginator(nfts, 50)
 
-        for batch in range(batches):
-            # load abi
-            abi_path = path.join(
-                path.dirname(__file__), "..", "..", "contracts", "RumiaNFT.json"
-            )
-            with open(abi_path) as f:
-                abi = json.load(f)["abi"]
+        # load abi
+        abi_path = path.join(
+            path.dirname(__file__), "..", "..", "contracts", "RumiaNFT.json"
+        )
+        with open(abi_path) as f:
+            abi = json.load(f)["abi"]
 
-            # new mint tx
-            w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL, request_kwargs={'timeout': 60}))
-            w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-            nft_contract = w3.eth.contract(address=settings.NFT_ADDRESS, abi=abi)
+        # new mint tx
+        w3 = Web3(Web3.HTTPProvider(settings.ETHEREUM_NODE_URL, request_kwargs={'timeout': 60}))
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        nft_contract = w3.eth.contract(address=settings.NFT_ADDRESS, abi=abi)
 
-            paginated_nfts = paginator.get_page(batch).object_list
+        # get current nft count, so we calculate the contract ids for our new tokens
+        initial_nft_contract_id = nft_contract.functions.totalSupply().call()
+
+        for batch in paginator.page_range:
+
+            initial_nft_contract_id += BATCH_COUNT*(batch-1)
+
+            paginated_nfts = paginator.page(batch).object_list
 
             uris = list(paginated_nfts.values_list("metadata_ipfs_uri", flat=True))
 
@@ -55,9 +61,6 @@ class Command(BaseCommand):
             self.stdout.write(
                 "%s %s" % (self.style.SUCCESS(formated_uris), settings.ETHEREUM_ACCOUNT)
             )
-
-            # get current nft count, so we calculate the contract ids for our new tokens
-            initial_nft_contract_id = nft_contract.functions.totalSupply().call()
 
             mint_tx_object = nft_contract.functions.safeMintBatch(
                 settings.ETHEREUM_ACCOUNT, formated_uris
@@ -81,7 +84,7 @@ class Command(BaseCommand):
             models.Nft.objects.bulk_update(paginated_nfts, ["mint_tx", "contract_id"])
 
             # sleep for a few seconds, so it doesn't have issues with nonce
-            time.sleep(5)
+            time.sleep(60)
 
         # 4. signal celery task that check’s tx status every 5s
         tasks.check_mint_status.delay()
