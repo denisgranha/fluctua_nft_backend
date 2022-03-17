@@ -37,49 +37,48 @@ class Command(BaseCommand):
                 auth=requests_auth
             )
 
-            if token_response.status_code != 200:
+            if token_response.status_code == 200:
+                user.spotify_access_token = token_response.json()["access_token"]
+                user.save()
+
+                headers = CaseInsensitiveDict()
+                headers["Authorization"] = "Bearer " + user.spotify_access_token
+
+                data = {
+                    "ids": options["songs"].split(",")
+                }
+                logger.info(data)
+                # save song
+                song_response = requests.put(
+                    spotify_user_api_base_path + "/me/tracks", headers=headers, json=data
+                )
+
+                logger.info("Save Track %s" % song_response.status_code)
+                if song_response.status_code >= 400:
+                    logger.error(song_response.json())
+
+                # # save artist
+                # artist_response = requests.put(
+                #     spotify_user_api_base_path + "/me/following", headers=headers, data={
+                #         "ids": options["artists"],
+                #         "type": "artist",
+                #     }
+                # )
+                #
+                # logger.info("Save Artists %s" % artist_response.status_code)
+                # if artist_response.status_code >= 400:
+                #     logger.error(artist_response.json())
+                #
+                # # follow playlist
+                # playlist_response = requests.put(
+                #     spotify_user_api_base_path + "/playlists/" + options["playlist"] + "/followers",
+                #     headers=headers
+                # )
+                #
+                # logger.info("Save Playlist %s" % playlist_response.status_code)
+                # if playlist_response.status_code >= 400:
+                #     logger.error(playlist_response.json())
+            else:
                 logger.error("User %s revoked spotify app permissions" % user.email)
-                break
-
-            user.spotify_access_token = token_response.json()["access_token"]
-            user.save()
-
-            headers = CaseInsensitiveDict()
-            headers["Authorization"] = "Bearer " + user.spotify_access_token
-
-            data = {
-                "ids": options["songs"].split(",")
-            }
-            logger.info(data)
-            # save song
-            song_response = requests.put(
-                spotify_user_api_base_path + "/me/tracks", headers=headers, json=data
-            )
-
-            logger.info("Save Track %s" % song_response.status_code)
-            if song_response.status_code >= 400:
-                logger.error(song_response.json())
-
-            # # save artist
-            # artist_response = requests.put(
-            #     spotify_user_api_base_path + "/me/following", headers=headers, data={
-            #         "ids": options["artists"],
-            #         "type": "artist",
-            #     }
-            # )
-            #
-            # logger.info("Save Artists %s" % artist_response.status_code)
-            # if artist_response.status_code >= 400:
-            #     logger.error(artist_response.json())
-            #
-            # # follow playlist
-            # playlist_response = requests.put(
-            #     spotify_user_api_base_path + "/playlists/" + options["playlist"] + "/followers",
-            #     headers=headers
-            # )
-            #
-            # logger.info("Save Playlist %s" % playlist_response.status_code)
-            # if playlist_response.status_code >= 400:
-            #     logger.error(playlist_response.json())
 
 
