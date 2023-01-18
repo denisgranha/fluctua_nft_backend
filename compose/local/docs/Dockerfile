@@ -1,5 +1,5 @@
 # Python build stage
-FROM python:3.10-slim as python-build-stage
+FROM python:3.11.1-slim as python-build-stage
 
 ARG BUILD_ENVIRONMENT=production
 ENV PYTHONUNBUFFERED 1
@@ -24,7 +24,7 @@ RUN set -ex \
 
 
 # Python 'run' stage
-FROM python:3.10-slim as python-run-stage
+FROM python:3.11.1-slim as python-run-stage
 
 ARG BUILD_ENVIRONMENT
 ENV PYTHONUNBUFFERED 1
